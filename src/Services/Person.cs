@@ -12,6 +12,7 @@ namespace covidSim.Services
         private PersonState state = PersonState.AtHome;
         private Rectangle home;
         private int sickStepsCount = 0;
+        private int boringCount;
 
         private const int StepsToRecoveryCount = 35;
 
@@ -31,6 +32,7 @@ namespace covidSim.Services
         public int HomeId;
         public Vec Position;
         public bool IsSick;
+        public bool isBoring;
 
 
         public void CalcNextStep()
@@ -46,6 +48,11 @@ namespace covidSim.Services
                 case PersonState.GoingHome:
                     CalcNextPositionForGoingHomePerson();
                     break;
+            }
+            
+            if (state == PersonState.AtHome && boringCount >= 5)
+            {
+                isBoring = true;
             }
             if (IsSick)
             {
@@ -64,9 +71,12 @@ namespace covidSim.Services
             {
                 state = PersonState.Walking;
                 CalcNextPositionForWalkingPerson();
+                isBoring = false;
+                boringCount = 0;
             }
             else
             {
+                boringCount++;
                 var nextPosition = CalculateHomeMovement();
                 while (!home.Contains(nextPosition.X, nextPosition.Y))
                     nextPosition = CalculateHomeMovement();
